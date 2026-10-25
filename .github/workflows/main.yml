@@ -13,27 +13,36 @@ permissions:
   contents: read
 
 jobs:
-  # CI: Build and test the application
   build:
     name: Build and Test
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Download source code from GitHub
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 2. Install PHP
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
+          php-version: '8.4'
           extensions: mbstring, xml, ctype, iconv, pdo_sqlite, sqlite3
           coverage: none
 
+      # 3. Install Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: npm
 
+      # 4. Install PHP dependencies
+      # This must run before any php artisan command.
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-interaction
+
+      # 5. Prepare Laravel environment
       - name: Prepare Laravel environment
         run: |
           cp .env.example .env
@@ -43,21 +52,22 @@ jobs:
           DB_CONNECTION: sqlite
           DB_DATABASE: database/database.sqlite
 
-      - name: Install Composer dependencies
-        run: composer install --prefer-dist --no-interaction
-
+      # 6. Install frontend dependencies
       - name: Install npm dependencies
-        uses: bahmutov/npm-install@v1
+        run: npm ci
 
+      # 7. Compile CSS and JavaScript
       - name: Build frontend assets
         run: npm run build
 
+      # 8. Run database migrations
       - name: Run database migrations
         env:
           DB_CONNECTION: sqlite
           DB_DATABASE: database/database.sqlite
         run: php artisan migrate --force
 
+      # 9. Run Laravel tests
       - name: Run Laravel tests
         env:
           APP_ENV: testing
@@ -68,19 +78,21 @@ jobs:
           QUEUE_CONNECTION: sync
         run: php artisan test
 
-  # CD: Deploy only after successful CI on main
   deploy:
     name: Deploy to Server
     runs-on: ubuntu-latest
     needs: build
 
-    # Deploy only after a push to main, never on pull requests
+    # Deploy only after a successful build on pushes to main.
+    # Pull requests run the build job but do not deploy.
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:
+      # 1. Download source code
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 2. Install PHP
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -88,20 +100,26 @@ jobs:
           extensions: mbstring, xml, ctype, iconv, pdo_sqlite, sqlite3
           coverage: none
 
+      # 3. Install Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: npm
 
+      # 4. Install production PHP dependencies
       - name: Install production Composer dependencies
         run: composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
 
+      # 5. Install frontend dependencies
       - name: Install npm dependencies
-        uses: bahmutov/npm-install@v1
+        run: npm ci
 
+      # 6. Build production frontend assets
       - name: Build frontend assets
         run: npm run build
 
+      # 7. Upload files to the deployment server using SSH/rsync
       - name: Deploy application files
         uses: burnett01/rsync-deployments@7.0.2
         with:
@@ -112,6 +130,7 @@ jobs:
           remote_user: ${{ secrets.DEPLOY_USER }}
           remote_key: ${{ secrets.DEPLOY_SSH_KEY }}
 
+      # 8. Run Laravel commands on the server
       - name: Run Laravel deployment commands
         uses: appleboy/ssh-action@v1.2.2
         with:
