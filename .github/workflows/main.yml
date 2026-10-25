@@ -107,9 +107,9 @@ jobs:
           node-version: '22'
           cache: npm
 
-      # 4. Install production PHP dependencies
+      # 4. Install production PHP dependencies (Ignoring requirements because server runs 8.3)
       - name: Install production Composer dependencies
-        run: composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+        run: composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader --ignore-platform-reqs
 
       # 5. Install frontend dependencies
       - name: Install npm dependencies
@@ -119,11 +119,11 @@ jobs:
       - name: Build frontend assets
         run: npm run build
 
-      # 7. Upload files to the deployment server using SSH/rsync
+      # 7. Upload files to the deployment server using SSH/rsync (Verbose flags added)
       - name: Deploy application files
         uses: burnett01/rsync-deployments@7.0.2
         with:
-          switches: -avzr --exclude=.git/ --exclude=.env --exclude=storage/
+          switches: -avzvr --progress --exclude=.git/ --exclude=.env --exclude=storage/
           path: ./
           remote_path: ${{ secrets.DEPLOY_PATH }}
           remote_host: ${{ secrets.DEPLOY_HOST }}
@@ -141,3 +141,4 @@ jobs:
             cd "${{ secrets.DEPLOY_PATH }}"
             php artisan migrate --force
             php artisan optimize
+
