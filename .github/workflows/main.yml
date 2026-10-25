@@ -121,7 +121,7 @@ jobs:
 
       # 7. Upload files to the deployment server using SSH/rsync (Verbose flags added)
       - name: Deploy application files
-        uses: burnett01/rsync-deployments@7.0.2
+        uses: burnett01/rsync-deployments@v8
         with:
           switches: -avzvr --progress --exclude=.git/ --exclude=.env --exclude=storage/
           path: ./
