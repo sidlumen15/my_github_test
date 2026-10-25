@@ -125,7 +125,7 @@ jobs:
         with:
           switches: -avzr --exclude=.git/ --exclude=.env --exclude=storage/
           path: ./
-          remote_path: ${{ secrets.DEPLOY_PATH }}
+          remote_path: /
           remote_host: ${{ secrets.DEPLOY_HOST }}
           remote_user: ${{ secrets.DEPLOY_USER }}
           remote_key: ${{ secrets.DEPLOY_SSH_KEY }}
@@ -138,6 +138,6 @@ jobs:
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
-            cd "${{ secrets.DEPLOY_PATH }}"
+            cd /
             php artisan migrate --force
             php artisan optimize
