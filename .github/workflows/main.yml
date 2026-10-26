@@ -1,3 +1,4 @@
+
 name: Build & Test
 
 on:
@@ -19,11 +20,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Download source code from GitHub
+      # 1. Download source code
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Install PHP for testing (PHP 8.4)
+      # 2. Setup PHP
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -31,7 +32,7 @@ jobs:
           extensions: mbstring, xml, ctype, iconv, pdo_sqlite, sqlite3
           coverage: none
 
-      # 3. Install Node.js
+      # 3. Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -56,18 +57,18 @@ jobs:
       - name: Install npm dependencies
         run: npm ci
 
-      # 7. Compile CSS and JavaScript
+      # 7. Build frontend assets
       - name: Build frontend assets
         run: npm run build
 
-      # 8. Run database migrations
+      # 8. Verify database migrations
       - name: Run database migrations
         env:
           DB_CONNECTION: sqlite
           DB_DATABASE: database/database.sqlite
         run: php artisan migrate --force
 
-      # 9. Run Laravel tests
+      # 9. Run automated tests
       - name: Run Laravel tests
         env:
           APP_ENV: testing
