@@ -11,6 +11,19 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
+Route::get('/debug-info', function () {
+    return response()->json([
+        'message' => 'Laravel response works',
+        'php_version' => PHP_VERSION,
+        'base_path' => base_path(),
+        'view_exists' => file_exists(
+            resource_path('views/auth/login.blade.php')
+        ),
+        'view_cache_path' => config('view.compiled'),
+        'app_env' => app()->environment(),
+    ]);
+});
+
 Route::get('/test-db', function () {
     try {
         DB::connection()->getPdo();
