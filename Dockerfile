@@ -56,4 +56,4 @@ RUN mkdir -p storage/framework/cache storage/framework/sessions \
 
 # Render supplies PORT at runtime. This is suitable for a demo deployment;
 # for production traffic, use a production-grade PHP web server setup.
-CMD ["sh", "-c", "php artisan serve --host=0.0.0.0 --port=${PORT:-10000}"]
+CMD ["sh", "-c", "php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=${PORT:-10000}"]
