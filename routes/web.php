@@ -20,6 +20,11 @@ Route::get('/test-db', function () {
     }
 });
 
+Route::get('/debug-test', function () {
+    return response('LARAVEL_OUTPUT_OK', 200)
+        ->header('Content-Type', 'text/plain');
+});
+
 Route::middleware('guest')->group(function () {
     Route::get('/login', [
         AuthController::class,
