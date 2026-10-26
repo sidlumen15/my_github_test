@@ -46,8 +46,6 @@ RUN composer install \
     --no-progress \
     --optimize-autoloader
 
-RUN php artisan optimize:clear
-
 # Copy the compiled Vite assets from the frontend build.
 COPY --from=frontend /app/public/build ./public/build
 
