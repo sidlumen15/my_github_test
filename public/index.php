@@ -36,6 +36,15 @@ error_log(sprintf(
     strlen($response->getContent() ?? '')
 ));
 
-$response->send();
+error_log(sprintf(
+    'SEND_DIAG sapi=%s ob_level=%s headers_sent=%s content_length=%s',
+    PHP_SAPI,
+    ob_get_level(),
+    headers_sent() ? 'yes' : 'no',
+    strlen($response->getContent() ?? '')
+));
+
+$response->sendHeaders();
+echo $response->getContent();
 
 $kernel->terminate($request, $response);
