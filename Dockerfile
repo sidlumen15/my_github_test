@@ -54,6 +54,13 @@ RUN mkdir -p storage/framework/cache storage/framework/sessions \
     storage/framework/views storage/logs bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
+RUN echo "=== DIRECTORY PERMISSIONS ===" \
+    && id \
+    && ls -ld storage storage/framework \
+       storage/framework/views storage/framework/sessions \
+       storage/logs bootstrap/cache resources/views \
+       vendor public/build
+
 # Render supplies PORT at runtime. This is suitable for a demo deployment;
 # for production traffic, use a production-grade PHP web server setup.
 CMD ["sh", "-c", "php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=${PORT:-10000}"]
